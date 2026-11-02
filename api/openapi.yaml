@@ -1,0 +1,460 @@
+openapi: 3.1.0
+info:
+  title: Bazgain Places Go Migration Candidate
+  version: 0.1.0
+  description: Five-operation contract derived from the locked mobile contract and current admin runtime.
+servers:
+  - url: http://localhost:8080
+paths:
+  /v1/place-collections:
+    get:
+      operationId: listPlaceCollections
+      responses:
+        "200":
+          description: Published collections
+          headers:
+            ETag: {schema: {type: string}}
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/PlaceCollectionsResponse"}}
+        "304": {description: Not modified}
+        "429": {$ref: "#/components/responses/Error"}
+        "500": {$ref: "#/components/responses/Error"}
+  /v1/places:
+    get:
+      operationId: listPlaces
+      responses:
+        "200":
+          description: Published places
+          headers:
+            ETag: {schema: {type: string}}
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/PlaceListResponse"}}
+        "304": {description: Not modified}
+        "429": {$ref: "#/components/responses/Error"}
+        "500": {$ref: "#/components/responses/Error"}
+  /v1/places/{placeSlug}:
+    get:
+      operationId: getPlaceDetails
+      parameters:
+        - name: placeSlug
+          in: path
+          required: true
+          schema: {type: string, minLength: 1}
+      responses:
+        "200":
+          description: Published place details
+          headers:
+            ETag: {schema: {type: string}}
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/PlaceDetailsResponse"}}
+        "304": {description: Not modified}
+        "404": {$ref: "#/components/responses/Error"}
+        "429": {$ref: "#/components/responses/Error"}
+        "500": {$ref: "#/components/responses/Error"}
+  /v1/admin/places/{id}/publish:
+    post:
+      operationId: adminPublishPlace
+      security: [{bearerAuth: []}]
+      parameters: [{$ref: "#/components/parameters/PlaceID"}]
+      responses:
+        "200":
+          description: Published place
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/PlaceAdminView"}}
+        "401": {$ref: "#/components/responses/Error"}
+        "403": {$ref: "#/components/responses/Error"}
+        "404": {$ref: "#/components/responses/Error"}
+        "409": {$ref: "#/components/responses/Error"}
+        "422": {$ref: "#/components/responses/Error"}
+        "429": {$ref: "#/components/responses/Error"}
+        "500": {$ref: "#/components/responses/Error"}
+  /v1/admin/places/{id}/archive:
+    post:
+      operationId: adminArchivePlace
+      security: [{bearerAuth: []}]
+      parameters: [{$ref: "#/components/parameters/PlaceID"}]
+      responses:
+        "200":
+          description: Archived place
+          content:
+            application/json: {schema: {$ref: "#/components/schemas/PlaceAdminView"}}
+        "401": {$ref: "#/components/responses/Error"}
+        "403": {$ref: "#/components/responses/Error"}
+        "404": {$ref: "#/components/responses/Error"}
+        "422": {$ref: "#/components/responses/Error"}
+        "429": {$ref: "#/components/responses/Error"}
+        "500": {$ref: "#/components/responses/Error"}
+components:
+  securitySchemes:
+    bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+  parameters:
+    PlaceID:
+      name: id
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+  responses:
+    Error:
+      description: Stable error envelope
+      content:
+        application/json: {schema: {$ref: "#/components/schemas/ErrorEnvelope"}}
+  schemas:
+    ErrorEnvelope:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error: {$ref: "#/components/schemas/ErrorBody"}
+    ErrorBody:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code: {type: string}
+        message: {type: string}
+        fields:
+          type: array
+          items: {$ref: "#/components/schemas/FieldError"}
+    FieldError:
+      type: object
+      additionalProperties: false
+      required: [field, code, message]
+      properties:
+        field: {type: string}
+        code: {type: string}
+        message: {type: string}
+    GeoJSONPoint:
+      type: object
+      additionalProperties: false
+      required: [type, coordinates]
+      properties:
+        type: {const: Point}
+        coordinates:
+          type: array
+          minItems: 2
+          maxItems: 2
+          prefixItems:
+            - {type: number}
+            - {type: number}
+          description: Coordinates are ordered as [longitude, latitude].
+    GeoJSONPolygon:
+      type: object
+      additionalProperties: false
+      required: [type, coordinates]
+      properties:
+        type: {const: Polygon}
+        coordinates:
+          type: array
+          description: GeoJSON Polygon coordinates ordered as [longitude, latitude].
+          items:
+            type: array
+            items:
+              type: array
+              minItems: 2
+              maxItems: 2
+              prefixItems:
+                - {type: number}
+                - {type: number}
+    GeoJSONMultiPolygon:
+      type: object
+      additionalProperties: false
+      required: [type, coordinates]
+      properties:
+        type: {const: MultiPolygon}
+        coordinates:
+          type: array
+          description: GeoJSON MultiPolygon coordinates ordered as [longitude, latitude].
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: array
+                minItems: 2
+                maxItems: 2
+                prefixItems:
+                  - {type: number}
+                  - {type: number}
+    GeoJSONGeometry:
+      oneOf:
+        - {$ref: "#/components/schemas/GeoJSONPoint"}
+        - {$ref: "#/components/schemas/GeoJSONPolygon"}
+        - {$ref: "#/components/schemas/GeoJSONMultiPolygon"}
+    PlaceCollectionFilterSummary:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, sort_order]
+      properties:
+        id: {type: string}
+        slug: {type: string}
+        title: {type: string}
+        sort_order: {type: integer}
+        places_count: {type: [integer, "null"]}
+    PlaceCollectionSummary:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, sort_order, filters]
+      properties:
+        id: {type: string}
+        slug: {type: string}
+        title: {type: string}
+        subtitle: {type: [string, "null"]}
+        description: {type: [string, "null"]}
+        preview_image_url: {type: [string, "null"], format: uri}
+        icon_image_url: {type: [string, "null"], format: uri}
+        background_color: {type: [string, "null"], pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$'}
+        sort_order: {type: integer}
+        places_count: {type: [integer, "null"]}
+        filters: {type: array, items: {$ref: "#/components/schemas/PlaceCollectionFilterSummary"}}
+    PlaceCollectionsResponse:
+      type: object
+      additionalProperties: false
+      required: [collections]
+      properties:
+        collections: {type: array, items: {$ref: "#/components/schemas/PlaceCollectionSummary"}}
+    PlaceKind:
+      type: object
+      additionalProperties: false
+      required: [key, label]
+      properties:
+        key: {type: string}
+        label: {type: string}
+    PlaceKindRef:
+      type: object
+      additionalProperties: false
+      required: [id, key, label]
+      properties:
+        id: {type: string}
+        key: {type: string}
+        label: {type: string}
+    Badge:
+      type: object
+      additionalProperties: false
+      required: [id, title, tone]
+      properties:
+        id: {type: string}
+        title: {type: string}
+        tone: {enum: [neutral, accent, success, warning]}
+    PlaceTag:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title]
+      properties:
+        id: {type: string}
+        slug: {type: string}
+        title: {type: string}
+    FilterMembership:
+      type: object
+      additionalProperties: false
+      required: [filter_id, sort_order]
+      properties:
+        filter_id: {type: string}
+        sort_order: {type: integer}
+    CollectionMembership:
+      type: object
+      additionalProperties: false
+      required: [collection_id, sort_order, filter_memberships]
+      properties:
+        collection_id: {type: string}
+        sort_order: {type: integer}
+        filter_memberships: {type: array, items: {$ref: "#/components/schemas/FilterMembership"}}
+    OpeningPeriod:
+      type: object
+      additionalProperties: false
+      required: [open_day, open_time, close_day, close_time]
+      properties:
+        open_day: {type: string}
+        open_time: {type: string}
+        close_day: {type: string}
+        close_time: {type: string}
+    SpecialOpeningPeriod:
+      type: object
+      additionalProperties: false
+      required: [start_date, closed]
+      properties:
+        start_date: {type: string, format: date}
+        end_date: {type: [string, "null"], format: date}
+        closed: {type: boolean}
+        open_time: {type: [string, "null"]}
+        close_time: {type: [string, "null"]}
+        note_markdown: {type: [string, "null"]}
+    OpeningHours:
+      type: object
+      additionalProperties: false
+      required: [timezone, regular_periods]
+      properties:
+        timezone: {type: string}
+        note_markdown: {type: [string, "null"]}
+        regular_periods: {type: array, items: {$ref: "#/components/schemas/OpeningPeriod"}}
+        special_periods: {type: array, items: {$ref: "#/components/schemas/SpecialOpeningPeriod"}}
+    PlaceSummary:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, kind, sort_order, cover_image_url, navigation_point, badges, hashtags, collection_memberships]
+      properties:
+        id: {type: string}
+        slug: {type: string}
+        title: {type: string}
+        kind: {$ref: "#/components/schemas/PlaceKind"}
+        summary: {type: [string, "null"]}
+        sort_order: {type: integer}
+        cover_image_url: {type: string, format: uri}
+        location_label: {type: [string, "null"]}
+        navigation_point: {$ref: "#/components/schemas/GeoJSONPoint"}
+        badges: {type: array, items: {$ref: "#/components/schemas/Badge"}}
+        hashtags: {type: array, items: {$ref: "#/components/schemas/PlaceTag"}}
+        collection_memberships: {type: array, items: {$ref: "#/components/schemas/CollectionMembership"}}
+        opening_hours: {anyOf: [{$ref: "#/components/schemas/OpeningHours"}, {type: "null"}]}
+    PlaceListResponse:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items: {type: array, items: {$ref: "#/components/schemas/PlaceSummary"}}
+    MediaAsset:
+      type: object
+      additionalProperties: false
+      required: [id, type, url]
+      properties:
+        id: {type: string}
+        type: {enum: [image, video]}
+        url: {type: string, format: uri}
+        thumbnail_url: {type: [string, "null"], format: uri}
+        width: {type: [integer, "null"]}
+        height: {type: [integer, "null"]}
+        alt_text: {type: [string, "null"]}
+    PlaceAddress:
+      type: object
+      additionalProperties: false
+      properties:
+        display_text: {type: [string, "null"]}
+        region: {type: [string, "null"]}
+        district: {type: [string, "null"]}
+        locality: {type: [string, "null"]}
+        street: {type: [string, "null"]}
+        house: {type: [string, "null"]}
+    PlaceContact:
+      type: object
+      additionalProperties: false
+      required: [id, type, display_value, action_url]
+      properties:
+        id: {type: string}
+        type: {enum: [phone, telegram, whatsapp, website]}
+        label: {type: [string, "null"]}
+        display_value: {type: string}
+        action_url: {type: string, format: uri}
+    InfoBlock:
+      type: object
+      additionalProperties: false
+      required: [id, type, icon_key, title, value_markdown, sort_order]
+      properties:
+        id: {type: string}
+        type: {enum: [single_line, large]}
+        icon_key: {type: string}
+        title: {type: string}
+        value_markdown: {type: string}
+        background_color:
+          type: [object, "null"]
+          additionalProperties: false
+          required: [light, dark]
+          properties:
+            light: {type: string}
+            dark: {type: string}
+        sort_order: {type: integer}
+    PlaceDetails:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, kind, gallery, geometry, navigation_point, contacts, hashtags, badges, info_blocks]
+      properties:
+        id: {type: string}
+        slug: {type: string}
+        title: {type: string}
+        kind: {$ref: "#/components/schemas/PlaceKind"}
+        summary: {type: [string, "null"]}
+        description_markdown: {type: [string, "null"]}
+        gallery: {type: array, minItems: 1, items: {$ref: "#/components/schemas/MediaAsset"}}
+        geometry: {$ref: "#/components/schemas/GeoJSONGeometry"}
+        navigation_point: {$ref: "#/components/schemas/GeoJSONPoint"}
+        address: {anyOf: [{$ref: "#/components/schemas/PlaceAddress"}, {type: "null"}]}
+        contacts: {type: array, items: {$ref: "#/components/schemas/PlaceContact"}}
+        hashtags: {type: array, items: {$ref: "#/components/schemas/PlaceTag"}}
+        badges: {type: array, items: {$ref: "#/components/schemas/Badge"}}
+        info_blocks: {type: array, items: {$ref: "#/components/schemas/InfoBlock"}}
+        opening_hours: {anyOf: [{$ref: "#/components/schemas/OpeningHours"}, {type: "null"}]}
+    PlaceDetailsResponse:
+      type: object
+      additionalProperties: false
+      required: [place]
+      properties:
+        place: {$ref: "#/components/schemas/PlaceDetails"}
+    PlaceAdminView:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, kind, status, sort_order, gallery, contacts, badges, hashtags, info_blocks, collection_memberships, created_at, updated_at]
+      properties:
+        id: {type: string, format: uuid}
+        slug: {type: string}
+        title: {type: string}
+        kind: {$ref: "#/components/schemas/PlaceKindRef"}
+        summary: {type: [string, "null"]}
+        description_markdown: {type: [string, "null"]}
+        status: {enum: [draft, published, archived]}
+        sort_order: {type: integer}
+        location_label: {type: [string, "null"]}
+        address: {anyOf: [{$ref: "#/components/schemas/PlaceAddress"}, {type: "null"}]}
+        opening_hours: {anyOf: [{$ref: "#/components/schemas/OpeningHours"}, {type: "null"}]}
+        navigation_point: {anyOf: [{$ref: "#/components/schemas/GeoJSONPoint"}, {type: "null"}]}
+        geometry: {anyOf: [{$ref: "#/components/schemas/GeoJSONGeometry"}, {type: "null"}]}
+        gallery: {type: array, items: {$ref: "#/components/schemas/PlaceMediaAdmin"}}
+        contacts: {type: array, items: {$ref: "#/components/schemas/PlaceContactAdmin"}}
+        badges: {type: array, items: {$ref: "#/components/schemas/PlaceBadgeAdmin"}}
+        hashtags: {type: array, items: {$ref: "#/components/schemas/PlaceHashtagAdmin"}}
+        info_blocks: {type: array, items: {$ref: "#/components/schemas/InfoBlock"}}
+        collection_memberships: {type: array, items: {$ref: "#/components/schemas/CollectionMembership"}}
+        cover_media_id: {type: [string, "null"], format: uuid}
+        cover_image_url: {type: [string, "null"], format: uri}
+        published_at: {type: [string, "null"], format: date-time}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+    PlaceMediaAdmin:
+      type: object
+      additionalProperties: false
+      required: [id, kind, url, sort_order]
+      properties:
+        id: {type: string, format: uuid}
+        kind: {type: string, enum: [image, video]}
+        url: {type: string}
+        thumbnail_url: {type: [string, "null"]}
+        width: {type: [integer, "null"]}
+        height: {type: [integer, "null"]}
+        alt_text: {type: [string, "null"]}
+        sort_order: {type: integer}
+    PlaceContactAdmin:
+      type: object
+      additionalProperties: false
+      required: [id, type, display_value, action_url, sort_order]
+      properties:
+        id: {type: string, format: uuid}
+        type: {type: string, enum: [phone, telegram, whatsapp, website]}
+        label: {type: [string, "null"]}
+        display_value: {type: string}
+        action_url: {type: string, format: uri}
+        sort_order: {type: integer}
+    PlaceBadgeAdmin:
+      type: object
+      additionalProperties: false
+      required: [id, title, tone, sort_order]
+      properties:
+        id: {type: string, format: uuid}
+        title: {type: string}
+        tone: {type: string, enum: [neutral, accent, success, warning]}
+        sort_order: {type: integer}
+    PlaceHashtagAdmin:
+      type: object
+      additionalProperties: false
+      required: [id, slug, title, sort_order]
+      properties:
+        id: {type: string, format: uuid}
+        slug: {type: string}
+        title: {type: string}
+        sort_order: {type: integer}
