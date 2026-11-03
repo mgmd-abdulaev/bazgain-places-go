@@ -215,7 +215,7 @@ func (r *Repository) mutateLifecycle(parent context.Context, id, status string, 
 	if err != nil {
 		return nil, err
 	}
-	_, err = tx.Exec(ctx, `INSERT INTO audit_events(id,event_type,user_id,session_id,ip,user_agent,meta,created_at) VALUES($1,$2,$3::uuid,$4::uuid,$5,$6,$7::jsonb,statement_timestamp())`, auditID.String(), event, actor.UserID, actor.SessionID, env.IP, env.UserAgent, metaJSON)
+	_, err = tx.Exec(ctx, `INSERT INTO audit_events(id,event_type,user_id,session_id,ip,user_agent,meta,created_at) VALUES($1,$2,$3::uuid,$4::uuid,$5,$6,$7::jsonb,statement_timestamp())`, auditID.String(), event, actor.UserID, actor.SessionID, env.IP, env.UserAgent, string(metaJSON))
 	if err != nil {
 		return nil, err
 	}
