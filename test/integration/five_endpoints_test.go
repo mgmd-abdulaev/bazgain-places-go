@@ -167,6 +167,15 @@ func TestVideoOnlyGalleryPreservesCurrentNestJSPublishParity(t *testing.T) {
 	if _, err := env.pool.Exec(context.Background(), `UPDATE place_media SET kind='video'::place_media_kind WHERE place_id=$1::uuid`, publishableID); err != nil {
 		t.Fatalf("make gallery video-only: %v", err)
 	}
+
+	if _, err := env.pool.Exec(
+		context.Background(),
+		`UPDATE places SET cover_media_id=NULL WHERE id=$1::uuid`,
+		publishableID,
+	); err != nil {
+		t.Fatalf("clear explicit cover: %v", err)
+	}
+
 	response := request(t, env, http.MethodPost, "/v1/admin/places/"+publishableID+"/publish", nil, adminToken(t))
 	if response.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(response.Body)
