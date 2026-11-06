@@ -4,7 +4,7 @@ go 1.26.10
 
 require (
 	github.com/alicebob/miniredis/v2 v2.40.0
-	github.com/docker/go-connections v0.7.0
+	github.com/docker/go-connections v0.8.2
 	github.com/getkin/kin-openapi v0.152.0
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
