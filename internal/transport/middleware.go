@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/tx-mi/bazgain-places-go/internal/places"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/places"
 )
 
 type contextKey string

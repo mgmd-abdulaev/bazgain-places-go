@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/tx-mi/bazgain-places-go/internal/auth"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/auth"
 )
 
 func (r *Repository) FindAuthUser(ctx context.Context, id string) (*auth.User, error) {

@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/tx-mi/bazgain-places-go/internal/wire"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/wire"
 )
 
 func MapCollection(row CollectionRecord) wire.PlaceCollectionSummary {

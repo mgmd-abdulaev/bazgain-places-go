@@ -8,9 +8,9 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/places"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/wire"
 	"github.com/redis/go-redis/v9"
-	"github.com/tx-mi/bazgain-places-go/internal/places"
-	"github.com/tx-mi/bazgain-places-go/internal/wire"
 )
 
 var safeSlug = regexp.MustCompile(`^[a-z0-9](?:[a-z0-9-]{0,118}[a-z0-9])?$`)

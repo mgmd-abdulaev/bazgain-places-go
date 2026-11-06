@@ -14,8 +14,8 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/tx-mi/bazgain-places-go/internal/places"
-	"github.com/tx-mi/bazgain-places-go/internal/wire"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/places"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/wire"
 )
 
 type transportRepo struct {

@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tx-mi/bazgain-places-go/internal/places"
-	"github.com/tx-mi/bazgain-places-go/internal/wire"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/places"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/wire"
 )
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {

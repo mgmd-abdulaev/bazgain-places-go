@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/tx-mi/bazgain-places-go/internal/places"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/places"
 )
 
 func (r *Repository) loadListRelations(ctx context.Context, items []places.PlaceRecord) error {

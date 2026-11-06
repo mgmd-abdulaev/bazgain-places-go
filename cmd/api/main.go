@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/tx-mi/bazgain-places-go/internal/app"
-	"github.com/tx-mi/bazgain-places-go/internal/config"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/app"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/config"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"regexp"
 
-	"github.com/tx-mi/bazgain-places-go/internal/wire"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/wire"
 )
 
 var (

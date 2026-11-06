@@ -1,4 +1,4 @@
-module github.com/tx-mi/bazgain-places-go
+module github.com/mgmd-abdulaev/bazgain-places-go
 
 go 1.26.10
 

@@ -20,15 +20,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/auth"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/health"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/places"
+	postgresstore "github.com/mgmd-abdulaev/bazgain-places-go/internal/postgres"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/rediscache"
+	"github.com/mgmd-abdulaev/bazgain-places-go/internal/transport"
 	"github.com/redis/go-redis/v9"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"github.com/tx-mi/bazgain-places-go/internal/auth"
-	"github.com/tx-mi/bazgain-places-go/internal/health"
-	"github.com/tx-mi/bazgain-places-go/internal/places"
-	postgresstore "github.com/tx-mi/bazgain-places-go/internal/postgres"
-	"github.com/tx-mi/bazgain-places-go/internal/rediscache"
-	"github.com/tx-mi/bazgain-places-go/internal/transport"
 )
 
 const (
